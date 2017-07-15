@@ -254,3 +254,39 @@ for word_len in word_lens:
 figure['layout']['sliders'] = [sliders_dict]
 
 py.iplot(figure)
+
+from sklearn.preprocessing import MinMaxScaler
+
+df_subsampled = df[0:3000]
+X = MinMaxScaler().fit_transform(df_subsampled[['q1_n_words', 'q1len', 'q2_n_words', 'q2len', 'word_share']])
+y = df_subsampled['is_duplicate'].values
+
+tsne = TSNE(
+    n_components=3,
+    init='random', # pca
+    random_state=101,
+    method='barnes_hut',
+    n_iter=200,
+    verbose=2,
+    angle=0.5
+).fit_transform(X)
+
+trace1 = go.Scatter3d(
+    x=tsne[:,0],
+    y=tsne[:,1],
+    z=tsne[:,2],
+    mode='markers',
+    marker=dict(
+        sizemode='diameter',
+        color = y,
+        colorscale = 'Portland',
+        colorbar = dict(title = 'duplicate'),
+        line=dict(color='rgb(255, 255, 255)'),
+        opacity=0.75
+    )
+)
+
+data=[trace1]
+layout=dict(height=800, width=800, title='3d embedding with engineered features')
+fig=dict(data=data, layout=layout)
+py.iplot(fig, filename='3DBubble')
