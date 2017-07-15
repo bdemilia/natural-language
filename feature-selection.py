@@ -290,3 +290,34 @@ data=[trace1]
 layout=dict(height=800, width=800, title='3d embedding with engineered features')
 fig=dict(data=data, layout=layout)
 py.iplot(fig, filename='3DBubble')
+
+
+df_subsampled = df[0:500]
+
+N = 64
+
+#encoded = HashingVectorizer(n_features = N).fit_transform(df_subsampled.apply(lambda row: row['question1']+' '+row['question2'], axis=1).values)
+encoded = TfidfVectorizer(max_features = N).fit_transform(df_subsampled.apply(lambda row: row['question1']+' '+row['question2'], axis=1).values)
+# generate columns in the dataframe for each of the 32 dimensions
+cols = ['hashed_'+str(i) for i in range(encoded.shape[1])]
+for idx, col in enumerate(cols):
+    df_subsampled[col] = encoded[:,idx].toarray()
+
+plt.figure(figsize=(12,8))
+kws = {
+    'linewidth': 0.5,
+    'alpha': 0.7
+}
+parallel_coordinates(
+    df_subsampled[cols + ['is_duplicate']],
+    'is_duplicate',
+    axvlines=False, colormap=plt.get_cmap('plasma'),
+    **kws
+)
+#plt.grid(False)
+plt.xticks([])
+plt.xlabel("encoded question dimensions")
+plt.ylabel("value of dimension")
+
+n = 10000
+sns.pairplot(df[['q1len', 'q2len', 'q1_n_words', 'q2_n_words', 'is_duplicate']][0:n], hue='is_duplicate')
