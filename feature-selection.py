@@ -24,7 +24,7 @@ dfqa.shape
 
 from sklearn.feature_extraction.text import TfidfVectorizer, HashingVectorizer
 mq1 = TfidfVectorizer(max_features = 256).fit_transform(dfqa['question'].values)
-mq1
+
 
 diff_encodings = np.abs(mq1[::2] - mq1[1::2])
 diff_encodings
